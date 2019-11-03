@@ -9,7 +9,7 @@ function buildMetadata(sample) {
       console.log(response)
 
     // Use d3 to select the panel with id of `#sample-metadata`
-    var panel = d3.select('#sample-metadata').append('ul').append('b')
+    var panel = d3.select('#sample-metadata')
 
     // Use `.html("") to clear any existing metadata
     panel.html("")
@@ -27,14 +27,39 @@ function buildMetadata(sample) {
 
     // ---------------------------
 
+    console.log(`
+    ----------------- Logging Samples ----------------
+    SAMPLE #: ${response.sample}
+    A ${age} year old ${ETH} ${GEN} in ${LOC} 
+    with type ${bbType} blood washes ${WF} times a week.
+       
+    `)
+
     Object.entries(response).forEach(([d,i])=>{
-      panel.append('li')
-        .text(`${d.toUpperCase()}:    ${i}`)
+        panel.append('h6')
+        .text(`${d.toUpperCase()}: ${i}`)
     })
 
 
 
     // BONUS: Build the Gauge Chart
+    var data = [
+      {
+        domain: { x: [0, 1], y: [0, 1] },
+        value: WF,
+        title: { text: "Wash Frequency" },
+        type: "indicator",
+        mode: "gauge+number+delta",
+        delta: { reference: 9 },
+        steps: [
+          { range: [0, 1], color: "cyan" },
+          { range: [1, 2], color: "royalblue" },
+        ],
+      }
+    ];
+    
+    var layout = { width: 500, height: 500, margin: { t: 0, b: 0 } };
+    Plotly.newPlot('gauge', data, layout);
     
   });
 }
@@ -62,20 +87,25 @@ function buildCharts(sample) {
       y: response.sample_values,
       mode: 'markers',
       marker: {
-        size: response.sample_values
-      }
+        size: response.sample_values,
+        color: response.otu_ids,
+        colorsclale: 'jet'
+
+      },
+      text: response.otu_labels,
     };
     
     var data = [trace1];
     
     var layout = {
-      title: 'Marker Size',
+      title: 'Belly Button Bacteria',
       showlegend: false,
       height: 600,
-      width: 600
+      width: 1300
     };
     
     Plotly.newPlot('bubble', data, layout);
+    var bubbleG = d3.select("#bubble").attr('translate','transform(400)')
 
     // @TODO: Build a Pie Chart
     // HINT: You will need to use slice() to grab the top 10 sample_values,
@@ -90,8 +120,10 @@ function buildCharts(sample) {
 
     var layout = {
       showlegend: true,
+      width: 400
     };
     Plotly.newPlot('pie', [pieTrace], layout);
+   
   });
 }
 
